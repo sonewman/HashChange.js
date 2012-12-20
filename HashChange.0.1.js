@@ -11,11 +11,12 @@ var HashChange = (function() {
 	'use strict';
 	var hashtory = [ window.location.hash ],
 
+		API,	//	Variable defined which will be returned 
+					//	at the end of self execution
+
 		once = [],
 
 		repeat = [],
-
-		length = 0,
 
 		slice = [].slice,
 
@@ -32,7 +33,7 @@ var HashChange = (function() {
 		onHashChange = function() {
 			var i, unit;
 
-			for ( i = 0; i < length; i++ ) {
+			for ( i = 0; i < API.length; i++ ) {
 				unit = repeat[ i ];
 				if ( unit && has( unit, 'fns' ) ) {
 					callFunctionsArrayPassingHash( repeat[ i ].fns );
@@ -49,7 +50,6 @@ var HashChange = (function() {
 
 		},
 
-
 		check = function() {
 			var last_index = hashtory.length - 1,
 				newHash = window.location.hash,
@@ -61,7 +61,6 @@ var HashChange = (function() {
 			}
 		},
 
-
 		setFallback = function() {
 			setTimeout( check, 200 );
 		},
@@ -71,7 +70,6 @@ var HashChange = (function() {
 			setFallback();
 		},
 
-
 		initialize = function( id, args, what ) {
 			var i, l;
 			args = args || [];
@@ -80,7 +78,6 @@ var HashChange = (function() {
 
 				l = args.length;
 				for ( i = 0; i < l; i++ ) {
-					console.log( args[ i ] );
 					once.push( args[ i ] );
 				}
 
@@ -104,17 +101,17 @@ var HashChange = (function() {
 				}
 
 				if ( what === 'activate' ) {
-					callFunctionsArrayPassingHash( repeat[length].fns );
+					callFunctionsArrayPassingHash( repeat[API.length].fns );
 				}
 
-				length += 1;
+				API.length += 1;
 			}
 
 		},
 
 		//	returns index if present, else returns -1
 		idIndexInRepeat = function( id ) {
-			for ( var i = 0; i < length; i++ ) {
+			for ( var i = 0; i < API.length; i++ ) {
 				if ( repeat[i][id] !== undefined ) {
 					return i;
 				}
@@ -122,10 +119,8 @@ var HashChange = (function() {
 			return -1;
 		},
 
-
 		callFunctionsArrayPassingHash = function( arrayOfFns ) {
 			var i, l, fn, hash = window.location.hash;
-
 			if ( has( arrayOfFns, 'length' ) ) {
 				for ( i = 0, l = arrayOfFns.length; i < l; i++ ) {
 					fn = arrayOfFns[ i ];
@@ -134,7 +129,16 @@ var HashChange = (function() {
 					}
 				}
 			}
+		},
+
+		callForId = function( fn, id ) {
+			if ( !id ) {
+				throw new Error( 'Please Supply an ID for ' + fn + ' function.');
+			} 
 		};
+
+
+		//	Add event listener
 
 		if ( window.onhashchange !== undefined ) {
 
@@ -154,14 +158,18 @@ var HashChange = (function() {
 		}
 
 
-		return {
+		//	API Definitiion
+
+		API = {
 
 			subscribe : function( id ) {
+				callForId('subscribe', id );
 				initialize( id, slice.call( arguments, 1 ) );
 				return this;
 			},
 
 			activate : function( id ) {
+				callForId('activate', id );
 				initialize( id, slice.call( arguments, 1 ), 'activate' );
 				return this;
 			},
@@ -174,10 +182,7 @@ var HashChange = (function() {
 			unsubscribe : function( id ) {
 				var i;
 
-				if ( !id ) {
-					return;
-				}
-
+				callForId('unsubscribe', id );
 				i = idIndexInRepeat( id );
 
 				if ( i === -1 ) {
@@ -185,14 +190,14 @@ var HashChange = (function() {
 				}
 
 				repeat.splice( i, 1 );
-				length -= 1;
+				API.length -= 1;
 
 				return this;
 			},
 
-			hash : hashtory[ length ] || window.location.hash,
+			hash : window.location.hash,
 
-			length : length,
+			length : 0,
 
 			clear : function( id ) {
 				var i = 0, l = arguments.length, index;
@@ -203,7 +208,7 @@ var HashChange = (function() {
 
 					if ( index > -1 ) {
 						repeat.splice( index, 1 );
-						length -= 1;
+						API.length -= 1;
 					}
 
 				}
@@ -214,19 +219,23 @@ var HashChange = (function() {
 				
 				if ( what === 'repeat' ) {
 					repeat = [];
+					API.length = 0;
 				}
 				else if ( what === 'once' ) {
 					once = [];
 				}
 				else {
 					repeat = [];
+					API.length = 0;
 					once = [];
 				}
 
 				return this;
 			}
-
 		};
 
+		//	API Definition End
+
+		return API;	//	Return API
 
 	}());

@@ -63,18 +63,33 @@ describe('HashChange.js', function() {
 
 		});
 
-		//	add multiple function test
+		it('Should add two functions to be called on the hash change and on initialisation', function() {
+			var cb1, cb2;
+			cb1 = jasmine.createSpy('cb');
+			cb2 = jasmine.createSpy('cb');
+			HashChange.subscribe( 'activate-test-2', cb1, cb2 );
+
+			waits( 200 );
+
+			setHash('subscribe-test-2');
+
+			runs(function() {
+				expect( cb1 ).toHaveBeenCalledWith( '#subscribe-test-2' );
+				expect( cb2 ).toHaveBeenCalledWith( '#subscribe-test-2' );
+				setHash();
+			});
+
+		});
 
 	});
 
 	describe('HashChange.activate();', function() {
 
-		it('Should add a function to be called on the hash change', function() {
+		it('Should add a function to be called on the hash change and call them on initialisation', function() {
 			var cb = jasmine.createSpy('cb');
 			HashChange.activate( 'activate-test-1', cb );
 
 			expect( cb ).toHaveBeenCalledWith( '' );
-
 			waits( 200 );
 
 			setHash('activate-test-1');
@@ -87,7 +102,27 @@ describe('HashChange.js', function() {
 
 		});
 
-		//	add multiple function test
+		it('Should add two functions to be called on the hash change and on initialisation', function() {
+			var cb1, cb2;
+			cb1 = jasmine.createSpy('cb');
+			cb2 = jasmine.createSpy('cb');
+			HashChange.activate( 'activate-test-2', cb1, cb2 );
+
+			expect( cb1 ).toHaveBeenCalledWith( '' );
+			expect( cb2 ).toHaveBeenCalledWith( '' );
+			waits( 200 );
+
+			setHash('activate-test-2');
+
+			runs(function() {
+				expect( cb1 ).toHaveBeenCalledWith( '#activate-test-2' );
+				expect( cb1.callCount ).toEqual( 2 );
+				expect( cb2 ).toHaveBeenCalledWith( '#activate-test-2' );
+				expect( cb2.callCount ).toEqual( 2 );
+				setHash();
+			});
+
+		});
 
 	});
 
@@ -97,22 +132,41 @@ describe('HashChange.js', function() {
 			var cb = jasmine.createSpy('cb');
 
 			HashChange.once( cb );
-
 			waits( 200 );
 
 			setHash('once-test-1');
 
 			runs(function() {
 				expect( cb ).toHaveBeenCalledWith( '#once-test-1' );
+				setHash('once-test-1.1');
+				expect( cb.callCount ).toEqual( 1 );
 				setHash();
 			});
 
 		});
 
-		//	add multiple function test
+		it('Should add two functions to be called on the hash change once', function() {
+			var cb1, cb2;
+			cb1 = jasmine.createSpy('cb');
+			cb2 = jasmine.createSpy('cb');
+			HashChange.once( 'once-test-2', cb1, cb2 );
+
+			waits( 200 );
+
+			setHash('once-test-2');
+
+			runs(function() {
+				expect( cb1 ).toHaveBeenCalledWith( '#once-test-2' );
+				expect( cb2 ).toHaveBeenCalledWith( '#once-test-2' );
+				setHash( 'once-test-2.1' );
+				expect( cb1.callCount ).toEqual( 1 );
+				expect( cb2.callCount ).toEqual( 1 );
+				setHash();
+			});
+
+		});
 
 	});
-
 
 	describe('HashChange.clearAll();', function() {
 
@@ -129,7 +183,7 @@ describe('HashChange.js', function() {
 			HashChange.once( fn1 );
 			HashChange.once( fn2 );
 
-			HashChange.clearAll();
+			HashChange.clearAll( 'once' );
 
 			setHash('clearAll-test-one');
 
@@ -139,9 +193,39 @@ describe('HashChange.js', function() {
 			setHash();
 		});
 
+		it('Should clear all repeat functions if repeat is specified', function() {
+			var fn1, fn2;
 
+			fn1 = jasmine.createSpy( 'fn1' );
+			fn2 = jasmine.createSpy( 'fn2' );
+			HashChange.subscribe( 'fn1', fn1 );
+			HashChange.subscribe( 'fn2', fn2 );
+
+			HashChange.clearAll( 'repeat' );
+
+			setHash('clearAll-test-two');
+
+			expect( HashChange.length ).toEqual( 0 );
+
+			setHash();
+		});
 
 	});
 
+	describe('HashChange.clear();', function() {
 
+		it('Should take and Id and clear that event from the HashChange Repeat event list', function() {
+			var fn = jasmine.createSpy( 'fn' );
+
+			HashChange.subscribe( 'clear-test', fn );
+
+			expect( HashChange.length ).toEqual( 1 );
+
+
+		});
+
+	});
+	
 });
+
+
