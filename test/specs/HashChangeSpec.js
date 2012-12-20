@@ -38,7 +38,7 @@ describe('HashChange.js', function() {
 		});
 
 		it('Should return back a length of zero', function() {
-			expect( HashChange.length ).toEqual( 0 );
+			expect( HashChange.count() ).toEqual( 0 );
 		});
 
 		it('Should return back the current hash', function() {
@@ -59,6 +59,7 @@ describe('HashChange.js', function() {
 			runs(function() {
 				expect( cb ).toHaveBeenCalledWith( '#subscribe-test-1' );
 				setHash();
+				HashChange.clearAll( 'repeat' );
 			});
 
 		});
@@ -77,6 +78,7 @@ describe('HashChange.js', function() {
 				expect( cb1 ).toHaveBeenCalledWith( '#subscribe-test-2' );
 				expect( cb2 ).toHaveBeenCalledWith( '#subscribe-test-2' );
 				setHash();
+				HashChange.clearAll( 'repeat' );
 			});
 
 		});
@@ -98,6 +100,7 @@ describe('HashChange.js', function() {
 				expect( cb ).toHaveBeenCalledWith( '#activate-test-1' );
 				expect( cb.callCount ).toEqual( 2 );
 				setHash();
+				HashChange.clear( 'activate-test-1' );
 			});
 
 		});
@@ -172,7 +175,7 @@ describe('HashChange.js', function() {
 
 		it('Should clear all events when called with no arguments', function() {
 			HashChange.clearAll();
-			expect( HashChange.length ).toEqual( 0 );
+			expect( HashChange.count() ).toEqual( 0 );
 		});
 
 		it('Should clear all once functions if once is specified', function() {
@@ -205,7 +208,7 @@ describe('HashChange.js', function() {
 
 			setHash('clearAll-test-two');
 
-			expect( HashChange.length ).toEqual( 0 );
+			expect( HashChange.count() ).toEqual( 0 );
 
 			setHash();
 		});
@@ -219,12 +222,15 @@ describe('HashChange.js', function() {
 
 			HashChange.subscribe( 'clear-test', fn );
 
-			expect( HashChange.length ).toEqual( 1 );
-
-
+			expect( HashChange.count() ).toEqual( 1 );
+			HashChange.clear( 'clear-test' );
+			expect( HashChange.count() ).toEqual( 0 );
+			expect( fn ).not.toHaveBeenCalled();
 		});
 
 	});
+
+
 	
 });
 

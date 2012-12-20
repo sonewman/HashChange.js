@@ -11,9 +11,6 @@ var HashChange = (function() {
 	'use strict';
 	var hashtory = [ window.location.hash ],
 
-		API,	//	Variable defined which will be returned 
-					//	at the end of self execution
-
 		once = [],
 
 		repeat = [],
@@ -21,6 +18,8 @@ var HashChange = (function() {
 		slice = [].slice,
 
 		eventSupport = true,
+
+		count = 0,
 
 		has = function( obj, prop ) {
 			return obj.hasOwnProperty( prop );
@@ -33,7 +32,7 @@ var HashChange = (function() {
 		onHashChange = function() {
 			var i, unit;
 
-			for ( i = 0; i < API.length; i++ ) {
+			for ( i = 0; i < count; i++ ) {
 				unit = repeat[ i ];
 				if ( unit && has( unit, 'fns' ) ) {
 					callFunctionsArrayPassingHash( repeat[ i ].fns );
@@ -101,18 +100,18 @@ var HashChange = (function() {
 				}
 
 				if ( what === 'activate' ) {
-					callFunctionsArrayPassingHash( repeat[API.length].fns );
+					callFunctionsArrayPassingHash( repeat[count].fns );
 				}
 
-				API.length += 1;
+				count += 1;
 			}
 
 		},
 
 		//	returns index if present, else returns -1
 		idIndexInRepeat = function( id ) {
-			for ( var i = 0; i < API.length; i++ ) {
-				if ( repeat[i][id] !== undefined ) {
+			for ( var i = 0; i < count; i++ ) {
+				if ( repeat[i].id !== undefined ) {
 					return i;
 				}
 			}
@@ -158,9 +157,7 @@ var HashChange = (function() {
 		}
 
 
-		//	API Definitiion
-
-		API = {
+		return {
 
 			subscribe : function( id ) {
 				callForId('subscribe', id );
@@ -190,27 +187,30 @@ var HashChange = (function() {
 				}
 
 				repeat.splice( i, 1 );
-				API.length -= 1;
+				count -= 1;
 
 				return this;
 			},
 
 			hash : window.location.hash,
 
-			length : 0,
+			count : function() {
+				return count;
+			},
 
 			clear : function( id ) {
 				var i = 0, l = arguments.length, index;
 				
 				for ( ; i < l; i++ ) {
 
-					index = idIndexInRepeat( arguments[i] );
+					if ( arguments[i] !== undefined ) {
+						index = idIndexInRepeat( arguments[i] );
 
-					if ( index > -1 ) {
-						repeat.splice( index, 1 );
-						API.length -= 1;
+						if ( index > -1 ) {
+							repeat.splice( index, 1 );
+							count -= 1;
+						}
 					}
-
 				}
 
 			},
@@ -219,23 +219,19 @@ var HashChange = (function() {
 				
 				if ( what === 'repeat' ) {
 					repeat = [];
-					API.length = 0;
+					count = 0;
 				}
 				else if ( what === 'once' ) {
 					once = [];
 				}
 				else {
 					repeat = [];
-					API.length = 0;
+					count = 0;
 					once = [];
 				}
 
 				return this;
 			}
 		};
-
-		//	API Definition End
-
-		return API;	//	Return API
 
 }());
