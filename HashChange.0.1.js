@@ -73,14 +73,15 @@ var HashChange = (function() {
 
 
 		initialize = function( id, args, what ) {
-			var fn, i, l;
+			var i, l;
 			args = args || [];
 
 			if ( what === 'once' ) {
 
 				l = args.length;
 				for ( i = 0; i < l; i++ ) {
-					once[ once.length ] = fn;
+					console.log( args[ i ] );
+					once.push( args[ i ] );
 				}
 
 			}	
@@ -96,10 +97,10 @@ var HashChange = (function() {
 					repeat[ i ].fns = args;
 				}
 				else {
-					repeat[length] = {
+					repeat.push({
 						id : id,
 						fns : args
-					};
+					});
 				}
 
 				if ( what === 'activate' ) {
@@ -166,7 +167,7 @@ var HashChange = (function() {
 			},
 
 			once : function( id ) {
-				initialize( id, slice.call( arguments, 1 ), 'once' );
+				initialize( null, slice.call( arguments ), 'once' );
 				return this;
 			},
 
@@ -192,6 +193,22 @@ var HashChange = (function() {
 			hash : hashtory[ length ] || window.location.hash,
 
 			length : length,
+
+			clear : function( id ) {
+				var i = 0, l = arguments.length, index;
+				
+				for ( ; i < l; i++ ) {
+
+					index = idIndexInRepeat( arguments[i] );
+
+					if ( index > -1 ) {
+						repeat.splice( index, 1 );
+						length -= 1;
+					}
+
+				}
+
+			},
 
 			clearAll : function( what ) {
 				
