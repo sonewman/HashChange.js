@@ -4,7 +4,7 @@
  * Copyright 2012 http://github.com/acutecoder
  * Released under the MIT license
  *
- * Date: Tue Dec 18 2012 20:06:33 (GMT)
+ * Date: Thu Dec 20 2012 15:41 (GMT)
  */
 
 var HashChange = (function() {
@@ -238,4 +238,4 @@ var HashChange = (function() {
 
 		return API;	//	Return API
 
-	}());
+}());
