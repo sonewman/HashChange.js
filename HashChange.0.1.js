@@ -19,7 +19,7 @@ var HashChange = (function() {
 
 		eventSupport = true,
 
-		count = 0,
+		subCount = 0,
 
 		has = function( obj, prop ) {
 			return obj.hasOwnProperty( prop );
@@ -32,7 +32,7 @@ var HashChange = (function() {
 		onHashChange = function() {
 			var i, unit;
 
-			for ( i = 0; i < count; i++ ) {
+			for ( i = 0; i < subCount; i++ ) {
 				unit = repeat[ i ];
 				if ( unit && has( unit, 'fns' ) ) {
 					callFunctionsArrayPassingHash( repeat[ i ].fns );
@@ -70,7 +70,7 @@ var HashChange = (function() {
 		},
 
 		initialize = function( id, args, what ) {
-			var i, l;
+			var i, l, index;
 			args = args || [];
 
 			if ( what === 'once' ) {
@@ -91,26 +91,30 @@ var HashChange = (function() {
 
 				if ( i > -1 ) {
 					repeat[ i ].fns = args;
+					index = i;
 				}
 				else {
 					repeat.push({
 						id : id,
 						fns : args
 					});
+					index = subCount;
 				}
 
 				if ( what === 'activate' ) {
-					callFunctionsArrayPassingHash( repeat[count].fns );
+					if ( repeat[ index ] && has( repeat[ index ], 'fns' )  ) {
+						callFunctionsArrayPassingHash( repeat[ index ].fns );
+					}
 				}
 
-				count += 1;
+				subCount += 1;
 			}
 
 		},
 
 		//	returns index if present, else returns -1
 		idIndexInRepeat = function( id ) {
-			for ( var i = 0; i < count; i++ ) {
+			for ( var i = 0; i < subCount; i++ ) {
 				if ( repeat[i].id !== undefined ) {
 					return i;
 				}
@@ -187,15 +191,17 @@ var HashChange = (function() {
 				}
 
 				repeat.splice( i, 1 );
-				count -= 1;
+				subCount -= 1;
 
 				return this;
 			},
 
-			hash : window.location.hash,
+			hash : function() {
+				return window.location.hash;
+			},
 
 			count : function() {
-				return count;
+				return subCount;
 			},
 
 			clear : function( id ) {
@@ -203,12 +209,12 @@ var HashChange = (function() {
 				
 				for ( ; i < l; i++ ) {
 
-					if ( arguments[i] !== undefined ) {
-						index = idIndexInRepeat( arguments[i] );
+					if ( arguments[ i ] !== undefined ) {
+						index = idIndexInRepeat( arguments[ i ] );
 
 						if ( index > -1 ) {
 							repeat.splice( index, 1 );
-							count -= 1;
+							subCount -= 1;
 						}
 					}
 				}
@@ -219,14 +225,14 @@ var HashChange = (function() {
 				
 				if ( what === 'repeat' ) {
 					repeat = [];
-					count = 0;
+					subCount = 0;
 				}
 				else if ( what === 'once' ) {
 					once = [];
 				}
 				else {
 					repeat = [];
-					count = 0;
+					subCount = 0;
 					once = [];
 				}
 

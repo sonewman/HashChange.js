@@ -42,7 +42,7 @@ describe('HashChange.js', function() {
 		});
 
 		it('Should return back the current hash', function() {
-			expect( HashChange.hash ).toEqual( window.location.hash );
+			expect( HashChange.hash() ).toEqual( window.location.hash );
 		});
 	});
 
